@@ -1,5 +1,5 @@
 {
-  "name": "camera-chess",
+  "name": "k4-cam",
   "description": "Camera Chess web app",
   "version": "1.0.0",
   "type": "module",
@@ -9,9 +9,10 @@
     "lint": "biome lint src --error-on-warnings",
     "tsc": "tsc",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "test": "vitest run"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@bity/oauth2-auth-code-pkce": "^2.13.0",
     "@popperjs/core": "^2.11.8",
@@ -43,6 +44,7 @@
     "npm-check-updates": "^22.2.9",
     "typescript": "^5.9.3",
     "vite": "^8.1.4",
-    "vite-bundle-visualizer": "^1.2.1"
+    "vite-bundle-visualizer": "^1.2.1",
+    "vitest": "^5.0.4"
   }
 }

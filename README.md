@@ -30,6 +30,10 @@ the dates in the git history:
   takes a label.
 - The name "K4 Cam" (title, manifests, home page) with "based on ChessCam by Pbatch" and a
   Source code link (AGPL §13); `package.json`'s `license` field matches `LICENSE.md`.
+- **The K4 look on the K4 screens only** (`src/style/k4.css`, scoped to `.k4`): the club's six
+  colour tokens (paper by default, the inverse on black in the dark theme; the camera screen is
+  always dark), Syne and Syne Tactile self-hosted through `@fontsource`, four type roles, square
+  44 px controls, status marks. ChessCam's own screens keep their Bootstrap look.
 - Vitest for `src/utils/k4/` (`npm test`), a GitHub Actions workflow, `vercel.json` (the SPA
   rewrite for `/k4`), npm's `package-lock.json` as the one lockfile; two `==` in the board
   preview became `===` so `npm run build` passes Biome.

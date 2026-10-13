@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import type { SenderStatus } from "../../utils/k4/sender";
 
-// The status line of the K4 sidebar (live-boards spec §7.3): what the app
-// has, how long ago it answered, and anything the sender wants said. Facts
-// are set apart, never joined with dots.
+// The status line of the K4 sidebar (live-boards spec §7.3): a mark for what
+// the camera is doing now, the facts beside it set apart (never joined with
+// dots), and anything the sender wants said.
 
 const agoLabel = (then: number, now: number): string => {
   const s = Math.max(0, Math.round((now - then) / 1000));
@@ -19,6 +19,14 @@ const movesLabel = (plies: number): string => {
   return moves === 1 ? "1 move sent" : `${moves} moves sent`;
 };
 
+const MARK: Record<SenderStatus["phase"], { word: string; treatment: "solid" | "outline" | "plain" }> = {
+  idle: { word: "Connecting", treatment: "outline" },
+  live: { word: "Live", treatment: "solid" },
+  offline: { word: "Offline", treatment: "solid" },
+  taken: { word: "Paused", treatment: "outline" },
+  stopped: { word: "Stopped", treatment: "plain" },
+};
+
 const K4Status = ({ status }: { status: SenderStatus }) => {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -26,24 +34,22 @@ const K4Status = ({ status }: { status: SenderStatus }) => {
     return () => window.clearInterval(id);
   }, []);
 
+  const mark = MARK[status.phase];
   const facts: string[] = [];
-  if (status.phase === "idle") facts.push("Connecting");
-  if (status.phase === "live") facts.push("Live", movesLabel(status.sentPlies));
-  if (status.phase === "offline") facts.push("Offline", movesLabel(status.sentPlies));
-  if (status.phase === "taken") facts.push("Paused");
-  if (status.phase === "stopped") facts.push("Stopped");
+  if (status.phase === "live" || status.phase === "offline") facts.push(movesLabel(status.sentPlies));
   if (status.lastOkAt !== null && (status.phase === "live" || status.phase === "offline")) facts.push(`last ${agoLabel(status.lastOkAt, now)}`);
 
   return (
-    <div className="text-white text-start" role="status" aria-live="polite">
-      <div className="d-flex flex-wrap column-gap-3">
-        {facts.map((fact, i) => (
-          <span key={fact} className={i === 0 ? "fw-bold" : "text-white-50"}>
+    <div className="k4-body" role="status" aria-live="polite">
+      <div className="d-flex flex-wrap align-items-center column-gap-3 row-gap-1">
+        <span className={`k4-mark k4-mark--${mark.treatment}`}>{mark.word}</span>
+        {facts.map((fact) => (
+          <span key={fact} className="k4-small k4-muted">
             {fact}
           </span>
         ))}
       </div>
-      {status.sentence && <div className="small mt-1">{status.sentence}</div>}
+      {status.sentence && <div className="k4-small mt-2 k4-notice">{status.sentence}</div>}
     </div>
   );
 };

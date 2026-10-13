@@ -5,6 +5,7 @@ import { SOURCE_URL, UPSTREAM_AUTHOR, UPSTREAM_NAME } from "../../utils/k4/about
 import { keepAwake, type WakeLockHandle } from "../../utils/k4/wakeLock";
 import { useK4 } from "./k4Context";
 import K4Status from "./k4Status";
+import Nick from "./nick";
 
 // The sidebar of the K4 mode (live-boards spec §7.3, §9.2): who plays on this
 // board, the two steps of setting up, Start and Stop, how the sending goes,
@@ -72,14 +73,18 @@ const K4Sidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, side
 
   return (
     <Sidebar sidebarRef={sidebarRef} playing={playing} text={text} setText={setText}>
-      <li className="my-1 text-white text-start">
-        <div className="fw-bold">Board {session.board}, round {session.round}</div>
-        <div>{session.white} – {session.black}</div>
-        <div className="small text-white-50">{session.event}</div>
-        {resumedAt > 0 && <div className="small mt-1">Resuming at move {resumedAt}.</div>}
+      <li className="my-1 text-start">
+        <div className="k4-wordmark">Board {session.board}</div>
+        <div className="k4-body">
+          <Nick>{session.white}</Nick> – <Nick>{session.black}</Nick>
+        </div>
+        <div className="k4-small k4-muted">
+          {session.event}, round {session.round}
+        </div>
+        {resumedAt > 0 && <div className="k4-small mt-1">Resuming at move {resumedAt}.</div>}
       </li>
       {!playing && (
-        <li className="my-1 text-white-50 text-start small">
+        <li className="my-1 text-start k4-small k4-muted">
           {SETUP_LINES.map((line) => (
             <div key={line}>{line}</div>
           ))}
@@ -115,13 +120,13 @@ const K4Sidebar = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, side
           <SidebarButton onClick={() => sender?.takeOver()}>Take over</SidebarButton>
         </li>
       )}
-      {fps !== null && fps < 4 && <li className="my-1 small text-start text-warning">{SLOW_PHONE}</li>}
-      {playing && wakeLock?.fallback && <li className="my-1 small text-start text-warning">{wakeLock.fallback}</li>}
-      <li className="my-1 small text-start text-white-50">
+      {fps !== null && fps < 4 && <li className="my-1 k4-small text-start k4-notice k4-notice--signal">{SLOW_PHONE}</li>}
+      {playing && wakeLock?.fallback && <li className="my-1 k4-small text-start k4-notice">{wakeLock.fallback}</li>}
+      <li className="my-1 k4-small text-start k4-muted">
         <div>
           Based on {UPSTREAM_NAME} by {UPSTREAM_AUTHOR}.
         </div>
-        <a href={SOURCE_URL} target="_blank" rel="noreferrer" className="link-light">
+        <a href={SOURCE_URL} target="_blank" rel="noreferrer">
           Source code
         </a>
       </li>

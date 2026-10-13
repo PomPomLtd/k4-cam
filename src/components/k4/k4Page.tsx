@@ -1,3 +1,8 @@
+import "@fontsource/syne/400.css";
+import "@fontsource/syne/700.css";
+import "@fontsource/syne/800.css";
+import "@fontsource/syne-tactile/400.css";
+import "../../style/k4.css";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { VideoAndSidebar } from "../common";
@@ -26,26 +31,30 @@ const IDLE: SenderStatus = { phase: "idle", sentPlies: 0, lastOkAt: null, senten
 
 const UNREACHABLE = "Can't reach the app. Check the connection, then try again.";
 
-/** The one screen outside the camera: a title, a sentence or two, and where this app comes from. */
+/**
+ * The one screen outside the camera (the K4 look): the wordmark, the sentence
+ * as the one big thing, a line or two under it, and where this app comes from.
+ * Paper by default, the inverse on black where the phone prefers dark.
+ */
 const Shell = ({ title, children }: { title: string; children?: React.ReactNode }) => (
-  <main className="d-flex min-vh-100 flex-column align-items-center justify-content-center bg-dark text-white p-4 text-center">
-    <p className="small text-white-50 mb-4">{APP_NAME}</p>
-    <h1 className="h3 mb-3" style={{ maxWidth: "32rem" }}>
-      {title}
-    </h1>
-    <div className="d-flex flex-column align-items-center gap-3" style={{ maxWidth: "32rem" }}>
-      {children}
+  <main className="k4 d-flex min-vh-100 flex-column justify-content-between p-4">
+    <p className="k4-wordmark mb-0">{APP_NAME}</p>
+    <div className="py-5" style={{ maxWidth: "36rem" }}>
+      <h1 className="k4-display mb-4">{title}</h1>
+      <div className="d-flex flex-column gap-3 k4-body">{children}</div>
     </div>
-    <p className="small text-white-50 mt-5 mb-0">
-      Based on{" "}
-      <a href={UPSTREAM_URL} target="_blank" rel="noreferrer" className="link-light">
-        {UPSTREAM_NAME}
-      </a>{" "}
-      by {UPSTREAM_AUTHOR}.
-    </p>
-    <a href={SOURCE_URL} target="_blank" rel="noreferrer" className="small link-light">
-      Source code
-    </a>
+    <div className="k4-small k4-muted k4-rule-top pt-3">
+      <div>
+        Based on{" "}
+        <a href={UPSTREAM_URL} target="_blank" rel="noreferrer">
+          {UPSTREAM_NAME}
+        </a>{" "}
+        by {UPSTREAM_AUTHOR}.
+      </div>
+      <a href={SOURCE_URL} target="_blank" rel="noreferrer">
+        Source code
+      </a>
+    </div>
   </main>
 );
 
@@ -132,16 +141,18 @@ const K4Page = () => {
   if (screen.kind === "unreachable") {
     return (
       <Shell title={UNREACHABLE}>
-        <button type="button" className="btn btn-dark btn-outline-light" onClick={() => setAttempt((n) => n + 1)}>
-          Try again
-        </button>
+        <div>
+          <button type="button" className="k4-button k4-button--primary" onClick={() => setAttempt((n) => n + 1)}>
+            Try again
+          </button>
+        </div>
       </Shell>
     );
   }
   if (screen.kind === "stopped") {
     return (
       <Shell title={screen.sentence}>
-        <p className="text-white-50 mb-0">You can close this page.</p>
+        <p className="k4-muted mb-0">You can close this page.</p>
       </Shell>
     );
   }
@@ -149,7 +160,7 @@ const K4Page = () => {
     return (
       <Shell title={screen.sentence ?? "Stopped."}>
         <p className="mb-0">Thank you.</p>
-        <p className="text-white-50 mb-0">You can close this page.</p>
+        <p className="k4-muted mb-0">You can close this page.</p>
       </Shell>
     );
   }
@@ -163,7 +174,9 @@ const K4Page = () => {
         onStop: () => setScreen({ kind: "done", sentence: "Stopped." }),
       }}
     >
-      <VideoAndSidebar mode="k4" />
+      <div className="k4 k4-dark k4-camera">
+        <VideoAndSidebar mode="k4" />
+      </div>
     </K4Context.Provider>
   );
 };

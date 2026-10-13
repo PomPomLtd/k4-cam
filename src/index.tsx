@@ -14,6 +14,7 @@ import { persistStore } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import { registerSW } from "virtual:pwa-register";
 import { VideoAndSidebar } from './components/common';
+import K4Page from './components/k4/k4Page';
 
 // add this to prompt for a refresh
 const updateSW = registerSW({
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       {
         path: "/play",
         element: <VideoAndSidebar mode="play" />
+      },
+      {
+        path: "/k4",
+        element: <K4Page />
       },
       {
         path: "/export",

@@ -51,7 +51,9 @@ interface Game {
   greedy: boolean,
   fromOpponent: boolean,
   error: string | null,
-  clock: Clock | null
+  clock: Clock | null,
+  /** When the detection loop played the newest move (Date.now()); null for a reset or a resumed game. K4 mode. */
+  lastMoveAt: number | null
 }
 
 interface User {
@@ -65,7 +67,7 @@ interface RootState {
   user: User
 }
 
-type Mode = "record" | "upload" | "broadcast" | "play";
+type Mode = "record" | "upload" | "broadcast" | "play" | "k4";
 
 type SetBoolean = React.Dispatch<React.SetStateAction<boolean>>
 type SetString = React.Dispatch<React.SetStateAction<string>>

@@ -13,6 +13,7 @@ import { lichessPushRound } from "../../utils/lichess";
 import { useUser } from "../../slices/userSlice";
 import { START_FEN } from "../../utils/constants";
 import PlaySidebar from "../play/playSidebar";
+import K4Sidebar from "../k4/k4Sidebar";
 import { useMediaQuery } from 'react-responsive';
 
 const PortraitWarning = () => {
@@ -100,6 +101,7 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
       case "upload": return <UploadSidebar {...props} />
       case "play": return <PlaySidebar {...props} />
       case "broadcast": return <BroadcastSidebar {...props} />
+      case "k4": return <K4Sidebar {...props} />
     }
   }
 

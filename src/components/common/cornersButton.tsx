@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 import SidebarButton from "./sidebarButton";
 import type { CanvasRef, ModelRefs, SetStringArray, VideoRef } from "../../types";
 
-const CornersButton = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, setText}: 
-  ModelRefs & { videoRef: VideoRef, canvasRef: CanvasRef, setText: SetStringArray }) => {
+const CornersButton = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, setText, label = "Find Corners" }: 
+  ModelRefs & { videoRef: VideoRef, canvasRef: CanvasRef, setText: SetStringArray, label?: string }) => {
   const dispatch = useDispatch();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -19,7 +19,7 @@ const CornersButton = ({ piecesModelRef, xcornersModelRef, videoRef, canvasRef, 
 
   return (
     <SidebarButton onClick={handleClick}>
-      Find Corners
+      {label}
     </SidebarButton>
   );
 };

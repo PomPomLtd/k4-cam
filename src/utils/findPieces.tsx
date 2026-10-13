@@ -274,7 +274,8 @@ export const findPieces = (
         if (hasMove || hasGreedyMove) {
           // No takebacks in "play" mode
           const greedy = (mode === "play") ? false : hasGreedyMove;
-          const payload = makeUpdatePayload(boardRef.current, greedy);
+          // The wall-clock time the move was played, for the K4 mode's estimated clocks.
+          const payload = makeUpdatePayload(boardRef.current, greedy, false, null, Date.now());
           console.log("payload", payload);
           dispatch(gameUpdate(payload));
         }

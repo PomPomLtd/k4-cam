@@ -26,7 +26,8 @@ const initialState: Game = {
   "greedy": false,
   "fromOpponent": false,
   "error": null,
-  "clock": null
+  "clock": null,
+  "lastMoveAt": null
 };
 
 const gameSlice = createSlice({
@@ -71,7 +72,8 @@ const gameSlice = createSlice({
         "greedy": action.payload.greedy,
         "fromOpponent": action.payload.fromOpponent ?? false,
         "error": action.payload.error ?? null,
-        "clock": state.clock
+        "clock": state.clock,
+        "lastMoveAt": action.payload.lastMoveAt ?? null
       }
       return newState
     },
@@ -110,7 +112,7 @@ export const makePgn = (game: Game) => {
   return `[FEN "${game.start}"]\n \n${game.moves}`;
 }
 
-export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null) => {
+export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = false, fromOpponent: boolean = false, error: string | null = null, lastMoveAt: number | null = null) => {
   const history = board.history as HistoryEntry[] || [];
   const startFen = board.startFen || START_FEN;
 
@@ -124,10 +126,20 @@ export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = fa
     "lastMove": lastMove,
     "greedy": greedy,
     "fromOpponent": fromOpponent,
-    "error": error
+    "error": error,
+    "lastMoveAt": lastMoveAt
   }
 
   return payload
+}
+
+/** A board from a list of SAN moves (the K4 app's stored game), played from the start. */
+export const boardFromSans = (sans: readonly string[]): CameraChessBoard => {
+  const board = makeBoard({ ...initialState });
+  for (const san of sans) {
+    if (board.playSan(san) === null) break;
+  }
+  return board;
 }
 
 export const makeBoard = (game: Game): CameraChessBoard => {

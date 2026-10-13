@@ -1,3 +1,59 @@
+# K4 Cam
+
+**K4 Cam is a fork of [ChessCam](https://github.com/Pbatch/CameraChessWeb) by Pbatch**, made for
+[Schachklub Kreis 4](https://schachklub-k4.ch) (Zurich) and its Lichess broadcasts: a phone on a
+stand films a board, and the moves it recognises go to the club's events app
+(`events.skk4.ch`), which merges them into the round it already broadcasts, under the real
+names and with the result. Everything ChessCam does is still here, unchanged; the K4 mode is
+added at `/k4`. The app runs at **cam.skk4.ch**. Licence: **AGPL-3.0**, as upstream
+(`LICENSE.md`); the source of this modified version is this repository
+(https://github.com/PomPomLtd/k4-cam).
+
+## Changes in this fork (AGPL §5)
+
+Forked on 13 October 2026 from upstream `main` at `6410b63` (27 September 2026). Changed, with
+the dates in the git history:
+
+- **The `/k4` mode** (`src/components/k4/`, `src/utils/k4/`): a camera link
+  (`https://cam.skk4.ch/k4#v=1&api=<origin>&t=<token>`) names the events app and a camera
+  token in the URL fragment, which never reaches a server. The page asks the app which board it
+  films (`GET /api/live/v1/session`), lets ChessCam find the board, and sends the whole game
+  with the time each move was first seen (`PUT /api/live/v1/state`) whenever a settled move
+  changes and every 15 seconds otherwise; it resumes from the stored game after a reload or on
+  another phone, backs off while offline, keeps the screen on, and stops when the game has a
+  result, the round is over, or the organiser revokes the camera. No Lichess login, no Lichess
+  call, no image ever leaves the phone. The allowed API origins are a build setting
+  (`VITE_K4_API_ORIGINS`, see `.env.example`).
+- **One line in the detection loop** (`src/utils/findPieces.tsx`): the wall-clock time a move
+  was played travels with the game update (`Game.lastMoveAt`), for the app's estimated clocks.
+- `Mode` gains `"k4"`; `videoAndSidebar.tsx` picks the K4 sidebar for it; `cornersButton.tsx`
+  takes a label.
+- The name "K4 Cam" (title, manifests, home page) with "based on ChessCam by Pbatch" and a
+  Source code link (AGPL §13); `package.json`'s `license` field matches `LICENSE.md`.
+- Vitest for `src/utils/k4/` (`npm test`), a GitHub Actions workflow, `vercel.json` (the SPA
+  rewrite for `/k4`), npm's `package-lock.json` as the one lockfile; two `==` in the board
+  preview became `===` so `npm run build` passes Biome.
+
+Nothing in ChessCam's recognition (the models, the move matcher) is changed. The K4 mode's
+protocol is meant to be generic ("report moves to an address"); an issue will be opened upstream
+to offer it.
+
+## Running the K4 mode
+
+```bash
+npm install
+VITE_K4_API_ORIGINS=http://localhost:3901 npm start   # a development build also allows localhost:3000 and :3901
+npm test                                              # the K4 utilities
+npm run build                                         # tsc, Biome, Vite
+```
+
+Open a camera link made by the events app (its organiser's Cameras section, a printed camera
+card, or a player's "Film this game"); `/k4` without a link says the link isn't valid.
+
+---
+
+# ChessCam (upstream README)
+
 <div align="center">
 
 📌 This app is under active development and may experience minor issues.  

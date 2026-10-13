@@ -18,8 +18,8 @@ export default defineConfig({
           "**/*",
       ],
       manifest: {
-        "name": "ChessCam",
-        "short_name": "ChessCam",
+        "name": "K4 Cam",
+        "short_name": "K4 Cam",
         "start_url": ".",
         "icons": [
           {

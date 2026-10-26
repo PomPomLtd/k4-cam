@@ -105,6 +105,25 @@ const VideoAndSidebar = ({ mode }: { mode: Mode }) => {
     }
   }
 
+  // The K4 mode sets up in portrait too (the video above its column); filming wants landscape, and its sidebar says so.
+  if (mode === "k4") {
+    return (
+      <Container className={isPortrait ? "k4-stack" : ""}>
+        {isPortrait ? (
+          <>
+            <Video {...props} />
+            {Sidebar()}
+          </>
+        ) : (
+          <>
+            {Sidebar()}
+            <Video {...props} />
+          </>
+        )}
+      </Container>
+    );
+  }
+
   return (
     <Container>
       {isPortrait ? (

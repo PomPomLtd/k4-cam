@@ -133,9 +133,9 @@ export const makeUpdatePayload = (board: BoardWithMetadata, greedy: boolean = fa
   return payload
 }
 
-/** A board from a list of SAN moves (the K4 app's stored game), played from the start. */
-export const boardFromSans = (sans: readonly string[]): CameraChessBoard => {
-  const board = makeBoard({ ...initialState });
+/** A board from a list of SAN moves (the K4 app's stored game), played from the start, or from a scanned position. */
+export const boardFromSans = (sans: readonly string[], startFen: string | null = null): CameraChessBoard => {
+  const board = makeBoard({ ...initialState, start: startFen ?? START_FEN });
   for (const san of sans) {
     if (board.playSan(san) === null) break;
   }

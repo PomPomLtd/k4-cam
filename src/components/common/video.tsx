@@ -81,7 +81,9 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
       return;
     }
 
-    let height = ((windowWidth - sidebar.offsetWidth - MARKER_DIAMETER)
+    // The K4 mode in portrait stacks the video above the sidebar: the video takes the width.
+    const sidebarWidth = display.closest(".k4-stack") === null ? sidebar.offsetWidth : 0;
+    let height = ((windowWidth - sidebarWidth - MARKER_DIAMETER)
       / MEDIA_ASPECT_RATIO) + MARKER_DIAMETER;
     if (height > windowHeight) {
       height = windowHeight;
@@ -193,7 +195,8 @@ const Video = ({ piecesModelRef, canvasRef, videoRef, sidebarRef, playing,
   }
 
   const onLoadedMetadata = () => {
-    if (mode === "upload") {
+    // The K4 mode picks its lens itself (k4/lensControl.tsx): no forced minimum zoom there.
+    if (mode === "upload" || mode === "k4") {
       return;
     }
     window.setTimeout(() => {

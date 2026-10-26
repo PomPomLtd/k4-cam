@@ -14,6 +14,17 @@ added at `/k4`. The app runs at **cam.skk4.ch**. Licence: **AGPL-3.0**, as upstr
 Forked on 13 October 2026 from upstream `main` at `6410b63` (27 September 2026). Changed, with
 the dates in the git history:
 
+**26 October 2026.** After the first try on the club's phone stands: the `/k4` column is K4
+Cam's own (`src/components/k4/`: the names, Find the board, Start, then the lens, the camera and
+a scan of the position); it sets up in portrait too and films in landscape; **Start from move
+1** drops the stored game; a **lens** choice (wide / normal / close, from the track's zoom
+range, remembered) replaces upstream's forced minimum zoom in the K4 mode only (`video.tsx`);
+a **camera** select lists the phone's inputs once the stream plays (`deviceButton.tsx`'s list is
+now set once the browser has answered, an upstream bug); a **move list** while filming;
+**Scan the position** for a game already under way (`src/utils/k4/position.ts`: upstream's
+piece reader, the side to move and the move number from the player, castling rights from the
+home squares), sent to the events app as the record's start position.
+
 - **The `/k4` mode** (`src/components/k4/`, `src/utils/k4/`): a camera link
   (`https://cam.skk4.ch/k4#v=1&api=<origin>&t=<token>`) names the events app and a camera
   token in the URL fragment, which never reaches a server. The page asks the app which board it

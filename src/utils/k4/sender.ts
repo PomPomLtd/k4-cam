@@ -69,6 +69,8 @@ export type Outcome =
   | { kind: "retry"; afterMs: number; sentence: string | null }
   | { kind: "illegal"; sentence: string };
 
+export const POSITION_REFUSED = "The position was refused. Scan it again.";
+
 export const outcomeOf = (refusal: StateRefusal): Outcome => {
   switch (refusal.error) {
     case "finished":
@@ -86,6 +88,7 @@ export const outcomeOf = (refusal: StateRefusal): Outcome => {
     case "taken":
       return { kind: "taken", sentence: "Another camera is filming this game." };
     case "illegal":
+      if (refusal.ply < 0) return { kind: "illegal", sentence: POSITION_REFUSED };
       return { kind: "illegal", sentence: "A move was refused; the board may be out of step. Find the board again." };
     case "slow-down":
       return { kind: "retry", afterMs: Math.max(1, refusal.retryAfterSeconds) * 1_000, sentence: null };
@@ -137,8 +140,12 @@ export interface SenderDeps {
 export interface Sender {
   /** The camera's whole game as the detection loop now has it, and when its newest move was played. */
   update: (sans: readonly string[], greedy: boolean, at: number) => void;
-  /** Resume from the app's stored game (GET session), with the times already on this clock. */
-  resume: (sans: readonly string[], times: readonly number[]) => void;
+  /** Resume from the app's stored game (GET session), with the times already on this clock, and its start position if any. */
+  resume: (sans: readonly string[], times: readonly number[], startFen?: string | null) => void;
+  /** The player starts over from move 1: an empty game from the initial position, sent at once. */
+  restart: () => void;
+  /** The player scanned the position: an empty game from it, sent at once. */
+  setStart: (fen: string) => void;
   setFps: (fps: number | null) => void;
   /** The one request with takeOver: true (T8). */
   takeOver: () => void;
@@ -162,6 +169,8 @@ export const createSender = (deps: SenderDeps): Sender => {
 
   let seen: Seen = NOTHING_SEEN;
   let greedy = false;
+  /** The position the game starts from; null = the initial position (sent as no field). */
+  let startFen: string | null = null;
   /** Nothing goes out before `resume` set the baseline: an empty game sent first would wipe the app's record (T2). */
   let started = false;
   let fps: number | null = null;
@@ -195,6 +204,8 @@ export const createSender = (deps: SenderDeps): Sender => {
   };
 
   const settledNow = () => settle(seen, greedy, now(), deps.settleMs);
+  /** What a state is, for "did it change": the start position and the settled moves. */
+  const keyOf = (sans: readonly string[]) => `${startFen ?? ""}|${sans.join(" ")}`;
 
   const send = async () => {
     if (stopped() || !started) return;
@@ -209,6 +220,7 @@ export const createSender = (deps: SenderDeps): Sender => {
       sessionId: deps.sessionId,
       seq: ++seq,
       moves: toSend.sans,
+      ...(startFen !== null ? { startFen } : {}),
       times: toSend.at,
       sentAt: now(),
       ...(takeOverOnce ? { takeOver: true } : {}),
@@ -224,7 +236,7 @@ export const createSender = (deps: SenderDeps): Sender => {
   const handle = (res: ApiResult<StateAnswer>, sent: Seen) => {
     if (res.kind === "ok") {
       attempt = 0;
-      lastSent = sent.sans.join(" ");
+      lastSent = keyOf(sent.sans);
       setStatus({ phase: "live", sentPlies: res.answer.plies, lastOkAt: now(), sentence: null });
       schedule();
       return;
@@ -251,7 +263,7 @@ export const createSender = (deps: SenderDeps): Sender => {
       case "illegal":
         // The app refused the game; keep going with what the board says next, and say so.
         attempt = 0;
-        lastSent = sent.sans.join(" ");
+        lastSent = keyOf(sent.sans);
         setStatus({ phase: "live", sentence: outcome.sentence });
         schedule();
         return;
@@ -268,7 +280,7 @@ export const createSender = (deps: SenderDeps): Sender => {
       return;
     }
     const { seen: settled, recheckAt } = settledNow();
-    const changed = settled.sans.join(" ") !== lastSent;
+    const changed = keyOf(settled.sans) !== lastSent;
     if (changed || again) {
       again = false;
       void send();
@@ -291,10 +303,23 @@ export const createSender = (deps: SenderDeps): Sender => {
       greedy = isGreedy;
       schedule();
     },
-    resume: (sans, times) => {
+    resume: (sans, times, fen = null) => {
       seen = { sans: [...sans], at: [...times] };
       greedy = false;
+      startFen = fen ?? null;
       started = true;
+      schedule();
+    },
+    restart: () => {
+      seen = NOTHING_SEEN;
+      greedy = false;
+      startFen = null;
+      schedule();
+    },
+    setStart: (fen) => {
+      seen = NOTHING_SEEN;
+      greedy = false;
+      startFen = fen;
       schedule();
     },
     setFps: (value) => {

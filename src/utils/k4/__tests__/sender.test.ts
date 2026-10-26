@@ -299,3 +299,54 @@ describe("the sender", () => {
     off();
   });
 });
+
+describe("starting over, and starting from a position", () => {
+  test("restart sends an empty game at once; later moves build from it", async () => {
+    const f = makeFetch();
+    const s = make(f.fetchImpl, false);
+    s.resume(["g3", "e6"], [T0 - 2_000, T0 - 1_000]);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.bodies[0].moves).toEqual(["g3", "e6"]);
+    s.restart();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.calls()).toBe(2);
+    expect(f.bodies[1]).toMatchObject({ moves: [], times: [] });
+    expect(f.bodies[1]).not.toHaveProperty("startFen");
+    s.update(["e4"], false, T0 + 5_000);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.bodies[2]).toMatchObject({ moves: ["e4"], times: [T0 + 5_000] });
+  });
+
+  test("a scanned position goes out with every request; the moves after it; a restart drops it", async () => {
+    const f = makeFetch();
+    const s = make(f.fetchImpl);
+    await vi.advanceTimersByTimeAsync(0);
+    const fen = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3";
+    s.setStart(fen);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.calls()).toBe(2);
+    expect(f.bodies[1]).toMatchObject({ moves: [], startFen: fen });
+    s.update(["Bb5"], false, T0 + 1_000);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.bodies[2]).toMatchObject({ moves: ["Bb5"], startFen: fen });
+    s.restart();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.bodies[3].moves).toEqual([]);
+    expect(f.bodies[3]).not.toHaveProperty("startFen");
+  });
+
+  test("a resumed game keeps the stored start position", async () => {
+    const f = makeFetch();
+    const s = make(f.fetchImpl, false);
+    const fen = "8/8/8/4k3/8/8/4K3/8 w - - 0 40";
+    s.resume(["Kd3"], [T0], fen);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(f.bodies[0]).toMatchObject({ moves: ["Kd3"], startFen: fen });
+    await vi.advanceTimersByTimeAsync(15_000);
+    expect(f.bodies[1]).toMatchObject({ moves: ["Kd3"], startFen: fen });
+  });
+
+  test("a refused position has its own sentence", () => {
+    expect(outcomeOf({ error: "illegal", ply: -1, san: "" })).toEqual({ kind: "illegal", sentence: "The position was refused. Scan it again." });
+  });
+});

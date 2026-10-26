@@ -17,6 +17,8 @@ export interface SessionAnswer {
   black: string;
   /** The stored game, to resume from. */
   moves: string[];
+  /** The position the stored game starts from, when the camera scanned one; null (or absent, an older app) = the initial position. */
+  startFen?: string | null;
   /** When each ply was first seen, epoch ms on the server's clock. */
   times: number[];
   /** The server's clock, to convert `times`. */
@@ -36,6 +38,8 @@ export interface StateRequest {
   sessionId: string;
   seq: number;
   moves: string[];
+  /** The position the game starts from, when scanned mid-game; absent = the initial position. */
+  startFen?: string;
   /** When the phone first saw each move, in its own epoch ms (T10). */
   times: number[];
   /** The phone's clock when it sent the request. */

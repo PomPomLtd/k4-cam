@@ -6,7 +6,7 @@ import "../../style/k4.css";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { VideoAndSidebar } from "../common";
-import { boardFromSans, gameUpdate, makeUpdatePayload, useGame } from "../../slices/gameSlice";
+import { boardFromSans, gameResetStart, gameSetStart, gameUpdate, makeUpdatePayload, useGame } from "../../slices/gameSlice";
 import { APP_NAME, SOURCE_URL, UPSTREAM_AUTHOR, UPSTREAM_NAME, UPSTREAM_URL } from "../../utils/k4/about";
 import { getSession, localTimes, type SessionAnswer } from "../../utils/k4/api";
 import { INVALID_LINK, apiOrigins, clearFragment, readLink, recallLink, rememberLink, type CameraFragment } from "../../utils/k4/link";
@@ -115,8 +115,10 @@ const K4Page = () => {
       setStatus(st);
       if (st.phase === "stopped" && st.sentence !== null) setScreen({ kind: "done", sentence: st.sentence });
     });
-    dispatch(gameUpdate(makeUpdatePayload(boardFromSans(session.moves))));
-    sender.resume(session.moves, localTimes(session.times, session.now, Date.now()));
+    const startFen = session.startFen ?? null;
+    dispatch(startFen === null ? gameResetStart() : gameSetStart(startFen));
+    dispatch(gameUpdate(makeUpdatePayload(boardFromSans(session.moves, startFen))));
+    sender.resume(session.moves, localTimes(session.times, session.now, Date.now()), startFen);
     setFed(true);
     return () => {
       off();

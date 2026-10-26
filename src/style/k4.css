@@ -261,3 +261,161 @@
 .k4-camera .nav-pills > li {
   text-align: left;
 }
+
+/* ── The column beside the camera (Phase E, 26 Oct 2026) ──
+   One column of blocks, 12 px apart, scrolling on its own in landscape so
+   Stop is never pushed off the screen; in portrait (.k4-stack, the
+   container) the video sits above it and the page scrolls as a whole. */
+.k4-camera .k4-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 256px;
+  min-width: 256px;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  text-align: left;
+}
+
+.k4-camera .k4-side__block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.k4-camera .k4-side__foot {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--k4-rule);
+}
+
+/* The extras under Start (the lens, the camera, a scan), set apart by a rule. */
+.k4-camera .k4-side__more {
+  padding-top: 12px;
+  border-top: 1px solid var(--k4-rule);
+}
+
+.k4-camera .k4-side__board {
+  align-items: flex-start;
+}
+
+.k4-camera .k4-stack {
+  flex-direction: column;
+  min-height: 100dvh;
+  height: auto;
+}
+
+.k4-camera .k4-stack .k4-side {
+  width: 100%;
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* A field: its small muted label above the control. */
+.k4 .k4-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* A Segmented: 44 px items in one ink frame; the pressed one is an ink block. */
+.k4 .k4-segmented {
+  display: flex;
+  border: 1px solid var(--k4-ink);
+}
+
+.k4 .k4-segmented__item {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--k4-ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--k4-ink);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.k4 .k4-segmented__item:first-child {
+  border-left: 0;
+}
+
+.k4 .k4-segmented__item[aria-pressed="true"] {
+  background: var(--k4-ink);
+  color: var(--k4-paper);
+}
+
+.k4 .k4-segmented__item:focus-visible {
+  outline: 2px solid var(--k4-ink);
+  outline-offset: -3px;
+}
+
+/* A select and a number input: the same 44 px ink frame. */
+.k4 .k4-select,
+.k4 .k4-input {
+  min-height: 44px;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid var(--k4-ink);
+  border-radius: 0;
+  background: var(--k4-paper);
+  color: var(--k4-ink);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.k4 .k4-select:focus-visible,
+.k4 .k4-input:focus-visible {
+  outline: 2px solid var(--k4-ink);
+  outline-offset: 2px;
+}
+
+/* Stop: a quiet button in the signal colour. */
+.k4 .k4-button--danger {
+  color: var(--k4-signal);
+}
+
+/* The move list: a row per move, the number muted, the newest row framed. */
+.k4 .k4-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.k4 .k4-moves__list {
+  max-height: 11.25rem;
+  overflow-y: auto;
+  border-top: 1px solid var(--k4-rule);
+}
+
+.k4 .k4-moves__row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 1fr;
+  gap: 8px;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.k4 .k4-moves__row--last {
+  box-shadow: inset 0 0 0 1px var(--k4-ink);
+}
+
+.k4 .k4-moves__n {
+  color: var(--k4-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .k4 .k4-moves__list {
+    scroll-behavior: smooth;
+  }
+}

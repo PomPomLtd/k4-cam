@@ -37,12 +37,12 @@ const DeviceButton = ({ videoRef }: {videoRef: VideoRef }) => {
         }
         newDevices.push(device);
       });
+      // Set once the browser has answered (it was set before, so the list stayed empty).
+      setDevices(newDevices);
     })
     .catch((error: unknown) => {
       console.error("Unable to enumerate media devices", error);
     });
-
-    setDevices(newDevices);
   }, [])
 
   return (

@@ -419,3 +419,98 @@
     scroll-behavior: smooth;
   }
 }
+
+/* The set-up steps: a numbered list, the current step open with its controls,
+   the ones before it settled in a line with Change, the ones after muted. */
+.k4 .k4-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.k4 .k4-steps__item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  color: var(--k4-muted);
+}
+
+.k4 .k4-steps__item--current,
+.k4 .k4-steps__item--done {
+  color: var(--k4-ink);
+}
+
+.k4 .k4-steps__n {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+.k4 .k4-steps__item--current .k4-steps__n {
+  background: var(--k4-ink);
+  color: var(--k4-paper);
+}
+
+.k4 .k4-steps__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.k4 .k4-steps__title {
+  font-size: 1rem;
+  line-height: 28px;
+}
+
+.k4 .k4-steps__item--current .k4-steps__title {
+  font-weight: 700;
+}
+
+.k4 .k4-steps__change {
+  min-height: 0;
+  font-size: 0.8125rem;
+}
+
+/* A stacked choice: 44 px rows in one frame, the chosen one an ink block. */
+.k4 .k4-choices {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--k4-ink);
+}
+
+.k4 .k4-choices__item {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-top: 1px solid var(--k4-ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--k4-ink);
+  font: inherit;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.k4 .k4-choices__item:first-child {
+  border-top: 0;
+}
+
+.k4 .k4-choices__item[aria-pressed="true"] {
+  background: var(--k4-ink);
+  color: var(--k4-paper);
+}
+
+.k4 .k4-choices__item:focus-visible {
+  outline: 2px solid var(--k4-ink);
+  outline-offset: -3px;
+}

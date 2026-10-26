@@ -1,32 +1,25 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useMediaQuery } from "react-responsive";
-import { CornersButton } from "../common";
 import ChessboardPreview from "../common/chessboardPreview";
 import { useCorners } from "../../slices/cornersSlice";
-import { gameResetFen, gameResetMoves, gameResetStart, useGame } from "../../slices/gameSlice";
+import { useGame } from "../../slices/gameSlice";
 import type { CanvasRef, CornersDict, CornersRef, ModelRefs, SetBoolean, SetStringArray, SidebarRef, VideoRef } from "../../types";
 import { START_FEN } from "../../utils/constants";
 import { SOURCE_URL, UPSTREAM_AUTHOR, UPSTREAM_NAME } from "../../utils/k4/about";
-import { fullmovesOf, positionSummary, startOf } from "../../utils/k4/position";
+import { fullmovesOf, startOf } from "../../utils/k4/position";
 import { keepAwake, type WakeLockHandle } from "../../utils/k4/wakeLock";
-import CameraSelect from "./cameraSelect";
 import { useK4 } from "./k4Context";
 import K4Status from "./k4Status";
-import LensControl from "./lensControl";
 import MoveList from "./moveList";
 import Nick from "./nick";
-import ScanPanel from "./scanPanel";
+import SetupSteps from "./setupSteps";
 
 // The column beside the camera (live-boards spec §7.3, Phase E, 26 Oct
-// 2026): who plays on this board; setting up (the lens and the camera, Find
-// the board, a scan for a game under way, Start); filming (the status, the
-// moves, the small board, Stop). The camera view and the detection loop are
-// ChessCam's, untouched.
+// 2026): who plays on this board; setting up in four steps (setupSteps.tsx);
+// filming (the status, the moves, the small board, Stop). The camera view
+// and the detection loop are ChessCam's, untouched.
 
 const SLOW_PHONE = "This phone is slow. Move closer to a Wi-Fi point and close other apps, or use another phone.";
-const SETUP_LINE = "Phone on a stand beside the board, all four corners in view, a king on the far side.";
-const PORTRAIT_LINE = "Turn the phone to landscape to film.";
 
 /** "FPS: 6.2" from the detection loop's text → 6.2; null before it runs. */
 export const parseFps = (text: readonly string[]): number | null => {
@@ -74,7 +67,6 @@ const K4Sidebar = ({
   setText: SetStringArray;
 }) => {
   const { session, sender, status, onStop } = useK4();
-  const dispatch = useDispatch();
   const game = useGame();
   const corners = useCorners();
   const isPortrait = useMediaQuery({ orientation: "portrait" });
@@ -118,20 +110,11 @@ const K4Sidebar = ({
     onStop();
   };
 
-  const startOver = () => {
-    if (!window.confirm("Start from move 1? The moves recorded so far are dropped.")) return;
-    dispatch(gameResetStart());
-    dispatch(gameResetFen());
-    dispatch(gameResetMoves());
-    sender?.restart();
-  };
-
   const found = foundOnce || cornersMoved(corners);
   const fromPosition = game.start !== START_FEN;
   const hasMoves = game.moves.trim() !== "";
   const start = startOf(game.start);
   const nextMove = fullmovesOf(game.fen);
-  const startReason = status.phase === "stopped" ? "Stopped." : !found ? "Find the board first." : isPortrait ? PORTRAIT_LINE : null;
 
   return (
     <div ref={sidebarRef} className="k4-side">
@@ -146,32 +129,24 @@ const K4Sidebar = ({
       </div>
 
       {!playing && (
-        <>
-          {(hasMoves || fromPosition) && (
-            <div className="k4-side__block k4-notice">
-              <div className="k4-body">{hasMoves ? `Resuming at move ${nextMove}.` : `From a scanned position: ${positionSummary(game.start)}`}</div>
-              <button type="button" className="k4-button k4-button--block" onClick={startOver}>
-                Start from move 1
-              </button>
-            </div>
-          )}
-          <div className="k4-side__block k4-small k4-muted">{SETUP_LINE}</div>
-          <div className="k4-side__block">
-            <CornersButton piecesModelRef={piecesModelRef} xcornersModelRef={xcornersModelRef} videoRef={videoRef} canvasRef={canvasRef} setText={setText} label={found ? "Find the board again" : "Find the board"} />
-            {found && <div className="k4-small k4-muted">Board found. Drag a corner if one is off.</div>}
-          </div>
-          <div className="k4-side__block">
-            <button type="button" className="k4-button k4-button--primary k4-button--block" disabled={startReason !== null} onClick={() => setPlaying(true)}>
-              Start
-            </button>
-            {startReason !== null && <div className="k4-small k4-muted">{startReason}</div>}
-          </div>
-          <div className="k4-side__block k4-side__more">
-            <LensControl videoRef={videoRef} />
-            <CameraSelect videoRef={videoRef} />
-            <ScanPanel piecesModelRef={piecesModelRef} videoRef={videoRef} canvasRef={canvasRef} cornersRef={cornersRef} ready={found} onScanned={(fen) => (fen === null ? sender?.restart() : sender?.setStart(fen))} />
-          </div>
-        </>
+        <SetupSteps
+          piecesModelRef={piecesModelRef}
+          xcornersModelRef={xcornersModelRef}
+          videoRef={videoRef}
+          canvasRef={canvasRef}
+          cornersRef={cornersRef}
+          setText={setText}
+          text={text}
+          found={found}
+          isPortrait={isPortrait}
+          hasMoves={hasMoves}
+          fromPosition={fromPosition}
+          startFen={fromPosition ? game.start : null}
+          nextMove={nextMove}
+          status={status}
+          sender={sender}
+          onStart={() => setPlaying(true)}
+        />
       )}
 
       {playing && (
